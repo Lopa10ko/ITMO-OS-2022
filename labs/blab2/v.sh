@@ -44,8 +44,3 @@ do
     fi
 done > v.lst
 exit
-
-    echo "ProcessID="$pid" : Parent_ProcessID="$ppid" : Average_Running_Time="$art
-done > v.lst
-echo "Average_Running_Children_of_ParentID="$previous" is "${mean_art} >> v.lst
-exit
