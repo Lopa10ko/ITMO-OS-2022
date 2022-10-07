@@ -15,6 +15,9 @@
 # done | sort -n -k 2 | awk '{print "ProcessID="$1" : Parent_ProcessID="$2" : Average_Running_Time="$3}' | tee iv.lst
 # exit
 
+last_ppid=$(cat iv.lst | tail -1 | tr "=" " " | awk '{print $5}')
+last_pid=$(cat iv.lst | tail -1 | tr "=" " " | awk '{print $2}')
+last_art=0
 previous=0
 sum=0
 cnt=0
@@ -26,13 +29,22 @@ do
     if [[ $ppid -eq $previous ]]
     then
         echo $line >> v.lst
-        sum=$(echo "$sum+$art" | bc -l)
-        ((cnt++))
+        sum=$(echo "$sum + $art" | bc -l)
+        ((cnt+=1))
     else
         mean_art=$(echo "${sum}/${cnt}" | bc -l)
         echo "Average_Running_Children_of_ParentID="$previous" is "${mean_art}
-        sum=${mean_art}; cnt=1; previous=$ppid
+        sum=${art}; cnt=1; previous=$ppid
     fi
+    echo "ProcessID="$pid" : Parent_ProcessID="$ppid" : Average_Running_Time="$art
+    if [[ $ppid -eq $last_ppid && $pid -eq $last_pid ]]
+    then
+        last_art=$(echo "${sum}/${cnt}" | bc -l)
+        echo "Average_Running_Children_of_ParentID="$last_ppid" is "${last_art}
+    fi
+done > v.lst
+exit
+
     echo "ProcessID="$pid" : Parent_ProcessID="$ppid" : Average_Running_Time="$art
 done > v.lst
 echo "Average_Running_Children_of_ParentID="$previous" is "${mean_art} >> v.lst
